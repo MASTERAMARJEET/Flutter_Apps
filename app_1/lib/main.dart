@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import './question.dart';
-import './answer.dart';
+import './query.dart';
+import './bye.dart';
 
 void main() => runApp(TheApp());
 
@@ -21,28 +21,38 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var _listIndex = 0;
-  var _answerIndex = 1;
 
-  var details = [
+  final _details = const [
     {
       'question': 'Are you ready to get started with the App?',
-      'answer': ['No, Not yet', 'Yes!!..']
+      'answer': [
+        {'txt': 'No, Not yet', 'position': 0},
+        {'txt': 'Yes!!..', 'position': 1},
+      ]
     },
     {
       'question': 'What would you like to do with this App?',
-      'answer': ['Alarm', 'Daily Planner', 'Both']
+      'answer': [
+        {'txt': 'Alarm', 'position': 0},
+        {'txt': 'Daily Planner', 'position': 1},
+        {'txt': 'Both', 'position': 2},
+      ]
     },
   ];
-  void _answerQuestion() {
-    print((details[_listIndex]['answer'] as List<String>).elementAt(_answerIndex));
-    if (_answerIndex + _listIndex !=0 ){
-    setState(() {
-      _listIndex = 1;
-    }
-    );
+  void _answerQuestion(int _answerIndex) {
+    print((_details[_listIndex]['answer']
+        as List<Map<String, Object>>)[_answerIndex]['position']);
+    if (_answerIndex + _listIndex != 0 && _listIndex < _details.length) {
+      setState(() {
+        _listIndex += 1;
+      });
     }
   }
-
+  void _reset(){
+    setState(() {
+    _listIndex = 0;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -55,21 +65,9 @@ class _MyHomePageState extends State<MyHomePage> {
         //   backgroundColor: Colors.purple,
         // ),
         drawer: Drawer(),
-        body: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Question(
-              details[_listIndex]['question'],
-            ),
-            ...(details[_listIndex]['answer'] as List<String>).map((ans) {
-              return Answer(_answerQuestion, ans);
-            }).toList(),
-            // for (_answerIndex = 0, ){
-            // Answer(_answerQuestion, (details[_listIndex]['answer'] as List<String>).elementAt(0)),
-            // }
-          ],
-        ),
+        body: _listIndex < _details.length
+            ? Query(_answerQuestion, _details, _listIndex)
+            : Bye(_reset),
       ),
     );
   }
