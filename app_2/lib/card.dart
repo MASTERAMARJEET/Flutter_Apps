@@ -2,32 +2,59 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-class AlarmCard extends StatelessWidget {
-  final List<String> _alarmList;
-  Widget _idle;
+import './pages/alarm_setter.dart';
+
+class AlarmCard extends StatefulWidget {
+  final List<List<String>> _alarmList;
 
   AlarmCard(this._alarmList);
 
+  @override
+  _AlarmCardState createState() => _AlarmCardState();
+}
+
+class _AlarmCardState extends State<AlarmCard> {
+  Widget _idle;
+
+  void _updater(List<String> _value, int _index) {
+    setState(() {
+      widget._alarmList[_index] = _value;
+    });
+  }
+
   Widget _cardBuilder(BuildContext context, int _index) {
-    return Card(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 0.0, vertical: 25.0),
-        child: ListTile(
-          leading: Icon(
-            Icons.add_alarm,
-            size: 40,
-          ),
-          title: Text(
-            _alarmList[_index],
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 32,
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 2.0),
+      child: Card(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 30.0),
+          child: ListTile(
+            leading: Icon(
+              Icons.add_alarm,
+              size: 50,
+              color: Theme.of(context).primaryColor,
             ),
-          ),
-          trailing: IconButton(
-            icon: Icon(Icons.mode_edit),
-            onPressed: () {},
-            iconSize: 40,
+            title: Text(
+              widget._alarmList[_index].join(),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 32,
+              ),
+            ),
+            trailing: IconButton(
+              icon: Icon(Icons.mode_edit),
+              onPressed: () => Navigator.push<List<String>>(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              SetAlarmPage(widget._alarmList[_index])))
+                  .then((List<String> value) => _updater(value, _index)),
+              iconSize: 45,
+               color: Theme.of(context).primaryColor,
+            ),
           ),
         ),
       ),
@@ -35,10 +62,10 @@ class AlarmCard extends StatelessWidget {
   }
 
   Widget _renderwidget() {
-    if (_alarmList.length > 0) {
+    if (widget._alarmList.length > 0) {
       _idle = ListView.builder(
         itemBuilder: _cardBuilder,
-        itemCount: _alarmList.length,
+        itemCount: widget._alarmList.length,
       );
     } else {
       _idle = Center(

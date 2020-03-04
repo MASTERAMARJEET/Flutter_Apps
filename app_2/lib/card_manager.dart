@@ -8,19 +8,17 @@ class Manager extends StatefulWidget {
 }
 
 class _ManagerState extends State<Manager> {
-  List<String> _alarmList = [];
+  List<List<String>> _alarmList = [];
 
-  void _productadder() {
-    setState(() {
-      _alarmList.add('7:00 am');
-    });
-  }
+  void _alarmAdder() =>
+      setState(() => _alarmList.add(['07', ':', '00', ' ', 'am']));
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
+        Padding(padding: EdgeInsets.all(7.5)),
         Container(
           child: RaisedButton(
             child: Text(
@@ -30,7 +28,7 @@ class _ManagerState extends State<Manager> {
                 fontSize: 20,
               ),
             ),
-            onPressed: _productadder,
+            onPressed: _alarmAdder,
             color: Theme.of(context).primaryColor,
             elevation: 20.0,
           ),
