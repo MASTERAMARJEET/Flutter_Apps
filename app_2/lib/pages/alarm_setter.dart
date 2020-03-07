@@ -2,16 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../time_details.dart';
 
-class SetAlarmPage extends StatefulWidget {
+class SetAlarmPage extends StatelessWidget {
   final List<String> _detail;
 
   SetAlarmPage(this._detail);
 
-  @override
-  _SetAlarmPageState createState() => _SetAlarmPageState();
-}
-
-class _SetAlarmPageState extends State<SetAlarmPage> {
   final hourList =
       List<String>.generate(12, (i) => (i + 1).toString().padLeft(2, '0'));
   final minuteList =
@@ -25,7 +20,7 @@ class _SetAlarmPageState extends State<SetAlarmPage> {
         return Future.value(false);
       },
       child: Scaffold(
-        backgroundColor: Colors.grey[350],
+        backgroundColor: Theme.of(context).accentColor,
         extendBody: true,
         appBar: AppBar(
           title: Text(
@@ -38,14 +33,18 @@ class _SetAlarmPageState extends State<SetAlarmPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              TimeDetail('Set Hour', hourList, widget._detail, 0),
-              TimeDetail('Set Minutes', minuteList, widget._detail, 2),
-              TimeDetail('Set Period', periodList, widget._detail, 4),
+              TimeDetail('Set Hour', hourList, _detail, 0),
+              TimeDetail('Set Minutes', minuteList, _detail, 2),
+              TimeDetail('Set Period', periodList, _detail, 4),
               FloatingActionButton(
-                  child: Icon(Icons.add, size: 45),
-                  onPressed: () =>
-                      setState((){ 
-                        Navigator.pop(context, widget._detail);})),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: Icon(
+                    Icons.add,
+                    size: 45,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => Navigator.pop(context, _detail)
+              ),
             ],
           ),
         ),

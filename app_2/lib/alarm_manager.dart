@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './card.dart';
+import './alarm_card.dart';
 
 class Manager extends StatefulWidget {
   @override

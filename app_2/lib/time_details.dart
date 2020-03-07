@@ -19,8 +19,9 @@ class _TimeDetailState extends State<TimeDetail> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      color: Theme.of(context).accentColor,
+      margin: EdgeInsets.all(10.0),
+      shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      color: Colors.white,
       child: Container(
         child: ListTile(
           title: Text(
@@ -43,9 +44,8 @@ class _TimeDetailState extends State<TimeDetail> {
             hint: Text(widget._detailString),
             value: _selectedValue,
           ),
-          contentPadding: EdgeInsets.all(20.0),
         ),
-        margin: EdgeInsets.symmetric(vertical: 10.0),
+        margin: EdgeInsets.symmetric(vertical: 30.0),
       ),
     );
   }

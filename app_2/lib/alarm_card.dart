@@ -22,6 +22,40 @@ class _AlarmCardState extends State<AlarmCard> {
     });
   }
 
+  _showDeleteWarning(BuildContext context, int _index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(
+          'Are you sure?',
+          textAlign: TextAlign.center,
+          textScaleFactor: 1.3,
+        ),
+        content: Text(
+          'You want to delete this alarm?\nIt can\'t be undone',
+          textAlign: TextAlign.center,
+        ),
+        contentPadding: const EdgeInsets.all(10.0),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('No'),
+            textColor: Colors.black,
+          ),
+          FlatButton(
+            onPressed: () => setState(() {
+              widget._alarmList.removeAt(_index);
+              Navigator.pop(context);
+            }),
+            child: Text('Yes'),
+            textColor: Colors.black,
+          )
+        ],
+        backgroundColor: Theme.of(context).accentColor,
+      ),
+    );
+  }
+
   Widget _cardBuilder(BuildContext context, int _index) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 2.0),
@@ -29,7 +63,6 @@ class _AlarmCardState extends State<AlarmCard> {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
         child: Container(
-          margin: EdgeInsets.symmetric(vertical: 30.0),
           child: ListTile(
             leading: Icon(
               Icons.add_alarm,
@@ -41,7 +74,7 @@ class _AlarmCardState extends State<AlarmCard> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 32,
+                fontSize: 40,
               ),
             ),
             trailing: IconButton(
@@ -53,8 +86,19 @@ class _AlarmCardState extends State<AlarmCard> {
                               SetAlarmPage(widget._alarmList[_index])))
                   .then((List<String> value) => _updater(value, _index)),
               iconSize: 45,
-               color: Theme.of(context).primaryColor,
+              color: Theme.of(context).primaryColor,
             ),
+            subtitle: FlatButton(
+                onPressed: () => _showDeleteWarning(context, _index),
+                child: Text(
+                  'DELETE',
+                  style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                )),
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
           ),
         ),
       ),
