@@ -378,7 +378,7 @@ class MyListCircleScrollView extends StatefulWidget {
     Key key,
     this.controller,
     this.physics,
-    this.diameterRatio = MyRenderListCircleViewport.defaultDiameterRatio,
+    @required this.radius,
     this.perspective = MyRenderListCircleViewport.defaultPerspective,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
@@ -390,9 +390,8 @@ class MyListCircleScrollView extends StatefulWidget {
     this.renderChildrenOutsideViewport = false,
     @required List<Widget> children,
   })  : assert(children != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0.0,
-            MyRenderListCircleViewport.diameterRatioZeroMessage),
+        assert(radius != null),
+        assert(radius > 0.0, MyRenderListCircleViewport.radiusZeroMessage),
         assert(perspective != null),
         assert(perspective > 0),
         assert(perspective <= 0.01,
@@ -416,7 +415,7 @@ class MyListCircleScrollView extends StatefulWidget {
     Key key,
     this.controller,
     this.physics,
-    this.diameterRatio = MyRenderListCircleViewport.defaultDiameterRatio,
+    @required this.radius,
     this.perspective = MyRenderListCircleViewport.defaultPerspective,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
@@ -428,9 +427,8 @@ class MyListCircleScrollView extends StatefulWidget {
     this.renderChildrenOutsideViewport = false,
     @required this.childDelegate,
   })  : assert(childDelegate != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0.0,
-            MyRenderListCircleViewport.diameterRatioZeroMessage),
+        assert(radius != null),
+        assert(radius > 0.0, MyRenderListCircleViewport.radiusZeroMessage),
         assert(perspective != null),
         assert(perspective > 0),
         assert(perspective <= 0.01,
@@ -453,7 +451,7 @@ class MyListCircleScrollView extends StatefulWidget {
 
   final ScrollPhysics physics;
 
-  final double diameterRatio;
+  final double radius;
 
   final double perspective;
 
@@ -530,7 +528,7 @@ class _MyListCircleScrollViewState extends State<MyListCircleScrollView> {
         itemExtent: widget.itemExtent,
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return MyListCircleViewport(
-            diameterRatio: widget.diameterRatio,
+            radius: widget.radius,
             perspective: widget.perspective,
             offAxisFraction: widget.offAxisFraction,
             useMagnifier: widget.useMagnifier,
@@ -685,7 +683,7 @@ class MyListCircleElement extends RenderObjectElement
 class MyListCircleViewport extends RenderObjectWidget {
   const MyListCircleViewport({
     Key key,
-    this.diameterRatio = MyRenderListCircleViewport.defaultDiameterRatio,
+    @required this.radius,
     this.perspective = MyRenderListCircleViewport.defaultPerspective,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
@@ -698,9 +696,8 @@ class MyListCircleViewport extends RenderObjectWidget {
     @required this.childDelegate,
   })  : assert(childDelegate != null),
         assert(offset != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0,
-            MyRenderListCircleViewport.diameterRatioZeroMessage),
+        assert(radius != null),
+        assert(radius > 0, MyRenderListCircleViewport.radiusZeroMessage),
         assert(perspective != null),
         assert(perspective > 0),
         assert(perspective <= 0.01,
@@ -718,7 +715,7 @@ class MyListCircleViewport extends RenderObjectWidget {
         ),
         super(key: key);
 
-  final double diameterRatio;
+  final double radius;
 
   final double perspective;
 
@@ -749,7 +746,7 @@ class MyListCircleViewport extends RenderObjectWidget {
     return MyRenderListCircleViewport(
       childManager: childManager,
       offset: offset,
-      diameterRatio: diameterRatio,
+      radius: radius,
       perspective: perspective,
       offAxisFraction: offAxisFraction,
       useMagnifier: useMagnifier,
@@ -766,7 +763,7 @@ class MyListCircleViewport extends RenderObjectWidget {
       BuildContext context, MyRenderListCircleViewport renderObject) {
     renderObject
       ..offset = offset
-      ..diameterRatio = diameterRatio
+      ..radius = radius
       ..perspective = perspective
       ..offAxisFraction = offAxisFraction
       ..useMagnifier = useMagnifier

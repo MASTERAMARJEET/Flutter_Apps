@@ -21,14 +21,14 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
         body: Container(
-            height: 500.0,
-            color: Theme.of(context).primaryColor,
             child: CustomPicker(
+                radius: screenWidth - 100.0,
                 useMagnifier: true,
                 backgroundColor: null,
-                // offAxisFraction: -1.0,
+                // offAxisFraction: 1.0,
                 magnification: 1.125,
                 looping: true,
                 itemExtent: 50.0,
@@ -37,70 +37,4 @@ class MyHomePage extends StatelessWidget {
                 },
                 children: widgetList)));
   }
-
-// CustomMultiChildLayout(
-//               delegate: FollowTheLeader(),
-//               children: widgetList,
-//             )
-
-// CustomScrollView(
-//           anchor: 0.5,
-//           scrollDirection: Axis.vertical,
-//           slivers: <Widget>[
-//             SliverToBoxAdapter(
-//               child: Container(
-//                 child: Text('apple'),
-//               ),
-//             ),
-//             SliverList(
-//                 delegate: SliverChildBuilderDelegate(
-//                     (context, index) => _buildTile(context, index),
-//                     childCount: widgetList.length))
-//           ],
-//         ),
-//   Widget _buildTile(BuildContext context, int index) {
-//     return Column(
-//       children: <Widget>[
-//         SizedBox(
-//           height: 40.0,
-//         ),
-//         Container(
-//           color: Colors.amber,
-//           padding: const EdgeInsets.all(10.0),
-//           child: Text(
-//             widgetList[index],
-//             textScaleFactor: 2.0,
-//           ),
-//         ),
-//       ],
-//     );
-//   }
 }
-
-// enum _Slot {
-//   leader,
-//   follower,
-// }
-
-// class FollowTheLeader extends MultiChildLayoutDelegate {
-//   @override
-//   void performLayout(Size size) {
-//     Size leaderSize = Size.zero;
-
-//     if (hasChild(_Slot.leader)) {
-//       leaderSize = layoutChild(_Slot.leader, BoxConstraints.loose(size));
-//       positionChild(_Slot.leader, Offset.zero);
-//     }
-
-//     if (hasChild(_Slot.follower)) {
-//       layoutChild(_Slot.follower, BoxConstraints.tight(leaderSize));
-//       positionChild(
-//           _Slot.follower,
-//           Offset(
-//               size.width - leaderSize.width, size.height - leaderSize.height));
-//     }
-//   }
-
-//   @override
-//   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => false;
-// }

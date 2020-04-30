@@ -12,23 +12,18 @@ import 'package:flutter/material.dart' show Colors;
 import './list_circle_scroll_view.dart';
 import './list_circle_viewport.dart' show MyRenderListCircleViewport;
 
-/// Color of the 'magnifier' lens border.
 const Color _kHighlighterBorder = Color(0xFF5F5F5F);
 const Color _kDefaultBackground = Color(0xFFD2D4DB);
-// Eyeballed values comparing with a native picker to produce the right
-// curvatures and densities.
-const double _kDefaultDiameterRatio = 1.07;
+
 const double _kDefaultPerspective = 0.003;
 const double _kSqueeze = 1.45;
 
-/// Opacity fraction value that hides the wheel above and below the 'magnifier'
-/// lens with the same color as the background.
 const double _kForegroundScreenOpacityFraction = 0.7;
 
 class CustomPicker extends StatefulWidget {
   CustomPicker({
     Key key,
-    this.diameterRatio = _kDefaultDiameterRatio,
+    @required this.radius,
     this.backgroundColor = _kDefaultBackground,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
@@ -40,9 +35,8 @@ class CustomPicker extends StatefulWidget {
     @required List<Widget> children,
     bool looping = false,
   })  : assert(children != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0.0,
-            MyRenderListCircleViewport.diameterRatioZeroMessage),
+        assert(radius != null),
+        assert(radius > 0.0, MyRenderListCircleViewport.radiusZeroMessage),
         assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
@@ -55,7 +49,7 @@ class CustomPicker extends StatefulWidget {
 
   CustomPicker.builder({
     Key key,
-    this.diameterRatio = _kDefaultDiameterRatio,
+    @required this.radius,
     this.backgroundColor = _kDefaultBackground,
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
@@ -67,9 +61,8 @@ class CustomPicker extends StatefulWidget {
     @required IndexedWidgetBuilder itemBuilder,
     int childCount,
   })  : assert(itemBuilder != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0.0,
-            MyRenderListCircleViewport.diameterRatioZeroMessage),
+        assert(radius != null),
+        assert(radius > 0.0, MyRenderListCircleViewport.radiusZeroMessage),
         assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
@@ -79,7 +72,7 @@ class CustomPicker extends StatefulWidget {
             builder: itemBuilder, childCount: childCount),
         super(key: key);
 
-  final double diameterRatio;
+  final double radius;
 
   final Color backgroundColor;
 
@@ -134,8 +127,6 @@ class _CustomPickerState extends State<CustomPicker> {
   }
 
   void _handleSelectedItemChanged(int index) {
-    // Only the haptic engine hardware on iOS devices would produce the
-    // intended effects.
     bool hasSuitableHapticHardware;
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
@@ -155,47 +146,6 @@ class _CustomPickerState extends State<CustomPicker> {
     if (widget.onSelectedItemChanged != null) {
       widget.onSelectedItemChanged(index);
     }
-  }
-
-  /// Makes the fade to [CustomPicker.backgroundColor] edge gradients.
-  Widget _buildGradientScreen() {
-    if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255)
-      return Container();
-
-    final Color widgetBackgroundColor =
-        widget.backgroundColor ?? const Color(0xFFFFFFFF);
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: <Color>[
-                widgetBackgroundColor,
-                widgetBackgroundColor.withAlpha(0xF2),
-                widgetBackgroundColor.withAlpha(0xDD),
-                widgetBackgroundColor.withAlpha(0),
-                widgetBackgroundColor.withAlpha(0),
-                widgetBackgroundColor.withAlpha(0xDD),
-                widgetBackgroundColor.withAlpha(0xF2),
-                widgetBackgroundColor,
-              ],
-              stops: const <double>[
-                0.0,
-                0.05,
-                0.09,
-                0.22,
-                0.78,
-                0.91,
-                0.95,
-                1.0,
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _buildMagnifierScreen() {
@@ -252,9 +202,13 @@ class _CustomPickerState extends State<CustomPicker> {
   }
 
   Widget _addBackgroundToChild(Widget child) {
-    return DecoratedBox(
+    return Container(
+      width: widget.radius,
+      height: widget.radius * 2.0,
       decoration: BoxDecoration(
-        color: widget.backgroundColor,
+        color: Colors.blue,
+        borderRadius:
+            BorderRadius.horizontal(left: Radius.circular(widget.radius * 2)),
       ),
       child: child,
     );
@@ -263,7 +217,7 @@ class _CustomPickerState extends State<CustomPicker> {
   @override
   Widget build(BuildContext context) {
     Widget result = DefaultTextStyle(
-      style: TextStyle(fontStyle: FontStyle.normal, color: Colors.black),
+      style: TextStyle(color: Colors.black),
       child: Stack(
         children: <Widget>[
           Positioned.fill(
@@ -272,7 +226,7 @@ class _CustomPickerState extends State<CustomPicker> {
               child: MyListCircleScrollView.useDelegate(
                 controller: widget.scrollController ?? _controller,
                 physics: const FixedExtentScrollPhysics(),
-                diameterRatio: widget.diameterRatio,
+                radius: widget.radius,
                 perspective: _kDefaultPerspective,
                 offAxisFraction: widget.offAxisFraction,
                 useMagnifier: widget.useMagnifier,
@@ -284,7 +238,6 @@ class _CustomPickerState extends State<CustomPicker> {
               ),
             ),
           ),
-          _buildGradientScreen(),
           _buildMagnifierScreen(),
         ],
       ),

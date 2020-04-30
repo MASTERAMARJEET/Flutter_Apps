@@ -38,7 +38,7 @@ class MyRenderListCircleViewport extends RenderBox
   MyRenderListCircleViewport({
     @required this.childManager,
     @required ViewportOffset offset,
-    double diameterRatio = defaultDiameterRatio,
+    @required double radius,
     double perspective = defaultPerspective,
     double offAxisFraction = 0,
     bool useMagnifier = false,
@@ -50,8 +50,8 @@ class MyRenderListCircleViewport extends RenderBox
     List<RenderBox> children,
   })  : assert(childManager != null),
         assert(offset != null),
-        assert(diameterRatio != null),
-        assert(diameterRatio > 0, diameterRatioZeroMessage),
+        assert(radius != null),
+        assert(radius > 0, radiusZeroMessage),
         assert(perspective != null),
         assert(perspective > 0),
         assert(perspective <= 0.01, perspectiveTooHighMessage),
@@ -70,7 +70,7 @@ class MyRenderListCircleViewport extends RenderBox
           clipToSizeAndRenderChildrenOutsideViewportConflict,
         ),
         _offset = offset,
-        _diameterRatio = diameterRatio,
+        _radius = radius,
         _perspective = perspective,
         _offAxisFraction = offAxisFraction,
         _useMagnifier = useMagnifier,
@@ -82,13 +82,10 @@ class MyRenderListCircleViewport extends RenderBox
     addAll(children);
   }
 
-  static const double defaultDiameterRatio = 2.0;
-
   static const double defaultPerspective = 0.003;
 
-  static const String diameterRatioZeroMessage =
-      "You can't set a diameterRatio "
-      'of 0 or of a negative number. It would imply a cylinder of 0 in diameter '
+  static const String radiusZeroMessage = "You can't set a radius "
+      'of 0 or of a negative number. It would imply a circle of 0 in radius '
       'in which case nothing will be drawn.';
 
   static const String perspectiveTooHighMessage = 'A perspective too high will '
@@ -112,16 +109,16 @@ class MyRenderListCircleViewport extends RenderBox
     markNeedsLayout();
   }
 
-  double get diameterRatio => _diameterRatio;
-  double _diameterRatio;
-  set diameterRatio(double value) {
+  double get radius => _radius;
+  double _radius;
+  set radius(double value) {
     assert(value != null);
     assert(
       value > 0,
-      diameterRatioZeroMessage,
+      radiusZeroMessage,
     );
-    if (value == _diameterRatio) return;
-    _diameterRatio = value;
+    if (value == _radius) return;
+    _radius = value;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -272,8 +269,8 @@ class MyRenderListCircleViewport extends RenderBox
   }
 
   double get _maxVisibleRadian {
-    if (_diameterRatio < 1.0) return math.pi / 2.0;
-    return math.asin(1.0 / _diameterRatio);
+    if (_radius <= size.height / 2.0) return math.pi / 2.0;
+    return math.asin(size.height / (_radius * 2.0));
   }
 
   double _getIntrinsicCrossAxis(_MyChildSizingFunction childSize) {
@@ -490,118 +487,29 @@ class MyRenderListCircleViewport extends RenderBox
 
     if (angle > math.pi / 2.0 || angle < -math.pi / 2.0) return;
 
-    final Matrix4 transform = MatrixUtils.createCylindricalProjectionTransform(
-      radius: size.height * _diameterRatio / 2.0,
-      angle: angle,
-      perspective: _perspective,
-    );
+    Matrix4 transform = Matrix4.identity()
+      ..rotateZ(math.pi / 2.0)
+      ..setTranslationRaw((_radius * 11.0) / 20.0, 0.0, 0.0);
+
+    transform *= (Matrix4.rotationZ(angle)) *
+        Matrix4.translationValues(0.0, _radius, 0.0);
 
     final Offset offsetToCenter =
         Offset(untransformedPaintingCoordinates.dx, -_topScrollMarginExtent);
 
-    if (!useMagnifier)
-      _paintChildCylindrically(
-          context, offset, child, transform, offsetToCenter);
-    else
-      _paintChildWithMagnifier(
-        context,
-        offset,
-        child,
-        transform,
-        offsetToCenter,
-        untransformedPaintingCoordinates,
-      );
-  }
-
-  void _paintChildWithMagnifier(
-    PaintingContext context,
-    Offset offset,
-    RenderBox child,
-    Matrix4 cylindricalTransform,
-    Offset offsetToCenter,
-    Offset untransformedPaintingCoordinates,
-  ) {
-    final double magnifierTopLinePosition =
-        size.height / 2 - _itemExtent * _magnification / 2;
-    final double magnifierBottomLinePosition =
-        size.height / 2 + _itemExtent * _magnification / 2;
-
-    final bool isAfterMagnifierTopLine = untransformedPaintingCoordinates.dy >=
-        magnifierTopLinePosition - _itemExtent * _magnification;
-    final bool isBeforeMagnifierBottomLine =
-        untransformedPaintingCoordinates.dy <= magnifierBottomLinePosition;
-
-    if (isAfterMagnifierTopLine && isBeforeMagnifierBottomLine) {
-      final Rect centerRect = Rect.fromLTWH(0.0, magnifierTopLinePosition,
-          size.width, _itemExtent * _magnification);
-      final Rect topHalfRect =
-          Rect.fromLTWH(0.0, 0.0, size.width, magnifierTopLinePosition);
-      final Rect bottomHalfRect = Rect.fromLTWH(0.0,
-          magnifierBottomLinePosition, size.width, magnifierTopLinePosition);
-
-      context.pushClipRect(false, offset, centerRect,
-          (PaintingContext context, Offset offset) {
-        context.pushTransform(false, offset, _magnifyTransform(),
-            (PaintingContext context, Offset offset) {
-          context.paintChild(child, offset + untransformedPaintingCoordinates);
-        });
-      });
-
-      context.pushClipRect(
-        false,
-        offset,
-        untransformedPaintingCoordinates.dy <= magnifierTopLinePosition
-            ? topHalfRect
-            : bottomHalfRect,
-        (PaintingContext context, Offset offset) {
-          _paintChildCylindrically(
-              context, offset, child, cylindricalTransform, offsetToCenter);
-        },
-      );
-    } else {
-      _paintChildCylindrically(
-          context, offset, child, cylindricalTransform, offsetToCenter);
-    }
-  }
-
-  void _paintChildCylindrically(
-    PaintingContext context,
-    Offset offset,
-    RenderBox child,
-    Matrix4 cylindricalTransform,
-    Offset offsetToCenter,
-  ) {
-    context.pushTransform(
-      false,
-      offset,
-      _centerOriginTransform(cylindricalTransform),
-      (PaintingContext context, Offset offset) {
-        context.paintChild(
-          child,
-          offset + offsetToCenter,
-        );
-      },
-    );
-  }
-
-  Matrix4 _magnifyTransform() {
-    final Matrix4 magnify = Matrix4.identity();
-    magnify.translate(size.width * (-_offAxisFraction + 0.5), size.height / 2);
-    magnify.scale(_magnification, _magnification, _magnification);
-    magnify.translate(
-        -size.width * (-_offAxisFraction + 0.5), -size.height / 2);
-    return magnify;
-  }
-
-  Matrix4 _centerOriginTransform(Matrix4 originalMatrix) {
     final Matrix4 result = Matrix4.identity();
     final Offset centerOriginTranslation = Alignment.center.alongSize(size);
-    result.translate(centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
-        centerOriginTranslation.dy);
-    result.multiply(originalMatrix);
-    result.translate(-centerOriginTranslation.dx * (-_offAxisFraction * 2 + 1),
-        -centerOriginTranslation.dy);
-    return result;
+    result.translate(centerOriginTranslation.dx, centerOriginTranslation.dy);
+    result.multiply(transform);
+    result.translate(-centerOriginTranslation.dx, -centerOriginTranslation.dy);
+
+    context.pushTransform(false, offset, result,
+        (PaintingContext context, Offset offset) {
+      context.paintChild(
+        child,
+        offset + offsetToCenter,
+      );
+    });
   }
 
   @override
