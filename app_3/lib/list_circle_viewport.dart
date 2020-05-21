@@ -41,8 +41,6 @@ class MyRenderListCircleViewport extends RenderBox
     @required double radius,
     double perspective = defaultPerspective,
     double offAxisFraction = 0,
-    bool useMagnifier = false,
-    double magnification = 1,
     @required double itemExtent,
     double squeeze = 1,
     bool clipToSize = true,
@@ -56,9 +54,6 @@ class MyRenderListCircleViewport extends RenderBox
         assert(perspective > 0),
         assert(perspective <= 0.01, perspectiveTooHighMessage),
         assert(offAxisFraction != null),
-        assert(useMagnifier != null),
-        assert(magnification != null),
-        assert(magnification > 0),
         assert(itemExtent != null),
         assert(squeeze != null),
         assert(squeeze > 0),
@@ -73,8 +68,6 @@ class MyRenderListCircleViewport extends RenderBox
         _radius = radius,
         _perspective = perspective,
         _offAxisFraction = offAxisFraction,
-        _useMagnifier = useMagnifier,
-        _magnification = magnification,
         _itemExtent = itemExtent,
         _squeeze = squeeze,
         _clipToSize = clipToSize,
@@ -144,25 +137,6 @@ class MyRenderListCircleViewport extends RenderBox
     assert(value != null);
     if (value == _offAxisFraction) return;
     _offAxisFraction = value;
-    markNeedsPaint();
-  }
-
-  bool get useMagnifier => _useMagnifier;
-  bool _useMagnifier = false;
-  set useMagnifier(bool value) {
-    assert(value != null);
-    if (value == _useMagnifier) return;
-    _useMagnifier = value;
-    markNeedsPaint();
-  }
-
-  double get magnification => _magnification;
-  double _magnification = 1.0;
-  set magnification(double value) {
-    assert(value != null);
-    assert(value > 0);
-    if (value == _magnification) return;
-    _magnification = value;
     markNeedsPaint();
   }
 

@@ -12,13 +12,10 @@ import 'package:flutter/material.dart' show Colors;
 import './list_circle_scroll_view.dart';
 import './list_circle_viewport.dart' show MyRenderListCircleViewport;
 
-const Color _kHighlighterBorder = Color(0xFF5F5F5F);
 const Color _kDefaultBackground = Color(0xFFD2D4DB);
 
 const double _kDefaultPerspective = 0.003;
 const double _kSqueeze = 1.45;
-
-const double _kForegroundScreenOpacityFraction = 0.7;
 
 class CustomPicker extends StatefulWidget {
   CustomPicker({
@@ -26,8 +23,6 @@ class CustomPicker extends StatefulWidget {
     @required this.radius,
     this.backgroundColor = _kDefaultBackground,
     this.offAxisFraction = 0.0,
-    this.useMagnifier = false,
-    this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
     @required this.itemExtent,
@@ -37,7 +32,6 @@ class CustomPicker extends StatefulWidget {
   })  : assert(children != null),
         assert(radius != null),
         assert(radius > 0.0, MyRenderListCircleViewport.radiusZeroMessage),
-        assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
         assert(squeeze != null),
@@ -52,8 +46,6 @@ class CustomPicker extends StatefulWidget {
     @required this.radius,
     this.backgroundColor = _kDefaultBackground,
     this.offAxisFraction = 0.0,
-    this.useMagnifier = false,
-    this.magnification = 1.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
     @required this.itemExtent,
@@ -63,7 +55,6 @@ class CustomPicker extends StatefulWidget {
   })  : assert(itemBuilder != null),
         assert(radius != null),
         assert(radius > 0.0, MyRenderListCircleViewport.radiusZeroMessage),
-        assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
         assert(squeeze != null),
@@ -77,10 +68,6 @@ class CustomPicker extends StatefulWidget {
   final Color backgroundColor;
 
   final double offAxisFraction;
-
-  final bool useMagnifier;
-
-  final double magnification;
 
   final FixedExtentScrollController scrollController;
 
@@ -132,8 +119,11 @@ class _CustomPickerState extends State<CustomPicker> {
       case TargetPlatform.iOS:
         hasSuitableHapticHardware = true;
         break;
+      case TargetPlatform.windows:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
         hasSuitableHapticHardware = false;
         break;
     }
@@ -146,59 +136,6 @@ class _CustomPickerState extends State<CustomPicker> {
     if (widget.onSelectedItemChanged != null) {
       widget.onSelectedItemChanged(index);
     }
-  }
-
-  Widget _buildMagnifierScreen() {
-    final Color foreground = widget.backgroundColor?.withAlpha(
-        (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction)
-            .toInt());
-
-    return IgnorePointer(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              color: foreground,
-            ),
-          ),
-          Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(width: 0.0, color: _kHighlighterBorder),
-                bottom: BorderSide(width: 0.0, color: _kHighlighterBorder),
-              ),
-            ),
-            constraints: BoxConstraints.expand(
-              height: widget.itemExtent * widget.magnification,
-            ),
-          ),
-          Expanded(
-            child: Container(
-              color: foreground,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUnderMagnifierScreen() {
-    final Color foreground = widget.backgroundColor?.withAlpha(
-        (widget.backgroundColor.alpha * _kForegroundScreenOpacityFraction)
-            .toInt());
-
-    return Column(
-      children: <Widget>[
-        Expanded(child: Container()),
-        Container(
-          color: foreground,
-          constraints: BoxConstraints.expand(
-            height: widget.itemExtent * widget.magnification,
-          ),
-        ),
-        Expanded(child: Container()),
-      ],
-    );
   }
 
   Widget _addBackgroundToChild(Widget child) {
@@ -229,8 +166,6 @@ class _CustomPickerState extends State<CustomPicker> {
                 radius: widget.radius,
                 perspective: _kDefaultPerspective,
                 offAxisFraction: widget.offAxisFraction,
-                useMagnifier: widget.useMagnifier,
-                magnification: widget.magnification,
                 itemExtent: widget.itemExtent,
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: _handleSelectedItemChanged,
@@ -238,7 +173,6 @@ class _CustomPickerState extends State<CustomPicker> {
               ),
             ),
           ),
-          _buildMagnifierScreen(),
         ],
       ),
     );
@@ -246,7 +180,6 @@ class _CustomPickerState extends State<CustomPicker> {
     if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255) {
       result = Stack(
         children: <Widget>[
-          _buildUnderMagnifierScreen(),
           _addBackgroundToChild(result),
         ],
       );

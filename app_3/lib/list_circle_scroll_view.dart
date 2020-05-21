@@ -135,7 +135,8 @@ class FixedExtentScrollController extends ScrollController {
     }
 
     await Future.wait<void>(<Future<void>>[
-      for (_FixedExtentScrollPosition position in positions)
+      for (final _FixedExtentScrollPosition position
+          in positions.cast<_FixedExtentScrollPosition>())
         position.animateTo(
           itemIndex * position.itemExtent,
           duration: duration,
@@ -381,8 +382,6 @@ class MyListCircleScrollView extends StatefulWidget {
     @required this.radius,
     this.perspective = MyRenderListCircleViewport.defaultPerspective,
     this.offAxisFraction = 0.0,
-    this.useMagnifier = false,
-    this.magnification = 1.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
@@ -396,7 +395,6 @@ class MyListCircleScrollView extends StatefulWidget {
         assert(perspective > 0),
         assert(perspective <= 0.01,
             MyRenderListCircleViewport.perspectiveTooHighMessage),
-        assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
         assert(squeeze != null),
@@ -418,8 +416,6 @@ class MyListCircleScrollView extends StatefulWidget {
     @required this.radius,
     this.perspective = MyRenderListCircleViewport.defaultPerspective,
     this.offAxisFraction = 0.0,
-    this.useMagnifier = false,
-    this.magnification = 1.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
@@ -433,7 +429,6 @@ class MyListCircleScrollView extends StatefulWidget {
         assert(perspective > 0),
         assert(perspective <= 0.01,
             MyRenderListCircleViewport.perspectiveTooHighMessage),
-        assert(magnification > 0),
         assert(itemExtent != null),
         assert(itemExtent > 0),
         assert(squeeze != null),
@@ -456,10 +451,6 @@ class MyListCircleScrollView extends StatefulWidget {
   final double perspective;
 
   final double offAxisFraction;
-
-  final bool useMagnifier;
-
-  final double magnification;
 
   final double itemExtent;
 
@@ -531,8 +522,6 @@ class _MyListCircleScrollViewState extends State<MyListCircleScrollView> {
             radius: widget.radius,
             perspective: widget.perspective,
             offAxisFraction: widget.offAxisFraction,
-            useMagnifier: widget.useMagnifier,
-            magnification: widget.magnification,
             itemExtent: widget.itemExtent,
             squeeze: widget.squeeze,
             clipToSize: widget.clipToSize,
@@ -677,6 +666,7 @@ class MyListCircleElement extends RenderObjectElement
   @override
   void forgetChild(Element child) {
     _childElements.remove(child.slot);
+    super.forgetChild(child);
   }
 }
 
@@ -686,8 +676,6 @@ class MyListCircleViewport extends RenderObjectWidget {
     @required this.radius,
     this.perspective = MyRenderListCircleViewport.defaultPerspective,
     this.offAxisFraction = 0.0,
-    this.useMagnifier = false,
-    this.magnification = 1.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.clipToSize = true,
@@ -721,10 +709,6 @@ class MyListCircleViewport extends RenderObjectWidget {
 
   final double offAxisFraction;
 
-  final bool useMagnifier;
-
-  final double magnification;
-
   final double itemExtent;
 
   final double squeeze;
@@ -749,8 +733,6 @@ class MyListCircleViewport extends RenderObjectWidget {
       radius: radius,
       perspective: perspective,
       offAxisFraction: offAxisFraction,
-      useMagnifier: useMagnifier,
-      magnification: magnification,
       itemExtent: itemExtent,
       squeeze: squeeze,
       clipToSize: clipToSize,
@@ -766,8 +748,6 @@ class MyListCircleViewport extends RenderObjectWidget {
       ..radius = radius
       ..perspective = perspective
       ..offAxisFraction = offAxisFraction
-      ..useMagnifier = useMagnifier
-      ..magnification = magnification
       ..itemExtent = itemExtent
       ..squeeze = squeeze
       ..clipToSize = clipToSize
