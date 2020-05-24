@@ -1,3 +1,5 @@
+import 'dart:math' show sqrt1_2;
+
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/rendering.dart'
@@ -14,17 +16,16 @@ import './list_circle_viewport.dart' show MyRenderListCircleViewport;
 
 const Color _kDefaultBackground = Color(0xFFD2D4DB);
 
-const double _kDefaultPerspective = 0.003;
-const double _kSqueeze = 1.45;
+const double _kSqueeze = 1.0;
 
 class CustomPicker extends StatefulWidget {
   CustomPicker({
     Key key,
     @required this.radius,
     this.backgroundColor = _kDefaultBackground,
-    this.offAxisFraction = 0.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    @required this.markerRadius,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required List<Widget> children,
@@ -36,6 +37,8 @@ class CustomPicker extends StatefulWidget {
         assert(itemExtent > 0),
         assert(squeeze != null),
         assert(squeeze > 0),
+        assert(markerRadius != null),
+        assert(markerRadius > 0),
         childDelegate = looping
             ? MyListCircleChildLoopingListDelegate(children: children)
             : MyListCircleChildListDelegate(children: children),
@@ -45,9 +48,9 @@ class CustomPicker extends StatefulWidget {
     Key key,
     @required this.radius,
     this.backgroundColor = _kDefaultBackground,
-    this.offAxisFraction = 0.0,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    @required this.markerRadius,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
     @required IndexedWidgetBuilder itemBuilder,
@@ -59,6 +62,8 @@ class CustomPicker extends StatefulWidget {
         assert(itemExtent > 0),
         assert(squeeze != null),
         assert(squeeze > 0),
+        assert(markerRadius != null),
+        assert(markerRadius > 0),
         childDelegate = MyListCircleChildBuilderDelegate(
             builder: itemBuilder, childCount: childCount),
         super(key: key);
@@ -67,13 +72,13 @@ class CustomPicker extends StatefulWidget {
 
   final Color backgroundColor;
 
-  final double offAxisFraction;
-
   final FixedExtentScrollController scrollController;
 
   final double itemExtent;
 
   final double squeeze;
+
+  final double markerRadius;
 
   final ValueChanged<int> onSelectedItemChanged;
 
@@ -86,6 +91,7 @@ class CustomPicker extends StatefulWidget {
 class _CustomPickerState extends State<CustomPicker> {
   int _lastHapticIndex;
   FixedExtentScrollController _controller;
+  double _markerPosition;
 
   @override
   void initState() {
@@ -104,6 +110,8 @@ class _CustomPickerState extends State<CustomPicker> {
       assert(_controller == null);
       _controller = FixedExtentScrollController();
     }
+    _markerPosition =
+        _calculateMarkerPosition(widget.radius, widget.markerRadius);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -138,23 +146,51 @@ class _CustomPickerState extends State<CustomPicker> {
     }
   }
 
+  double _calculateMarkerPosition(double bigRadius, double smallRadius) {
+    /// 9 is in the formula because of the font size of the number. 1.25 is factor.
+    double position =
+        (bigRadius - widget.itemExtent + 9 * 1.25) * sqrt1_2 - smallRadius;
+    return position;
+  }
+
   Widget _addBackgroundToChild(Widget child) {
-    return Container(
-      width: widget.radius,
-      height: widget.radius * 2.0,
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius:
-            BorderRadius.horizontal(left: Radius.circular(widget.radius * 2)),
-      ),
-      child: child,
+    return Stack(
+      children: <Widget>[
+        Container(
+          child: Placeholder(),
+          width: widget.radius,
+          height: widget.radius,
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            borderRadius:
+                BorderRadius.only(topLeft: Radius.circular(widget.radius)),
+          ),
+        ),
+        Positioned(
+          bottom: _markerPosition,
+          right: _markerPosition,
+          child: Container(
+            child: Placeholder(),
+            width: widget.markerRadius * 2,
+            height: widget.markerRadius * 2,
+            decoration: BoxDecoration(
+                color: Colors.greenAccent,
+                borderRadius: BorderRadius.circular(widget.itemExtent)),
+          ),
+        ),
+        Container(
+          width: widget.radius,
+          height: widget.radius,
+          child: child,
+        )
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     Widget result = DefaultTextStyle(
-      style: TextStyle(color: Colors.black),
+      style: TextStyle(color: Colors.black, fontSize: 18.0),
       child: Stack(
         children: <Widget>[
           Positioned.fill(
@@ -164,8 +200,6 @@ class _CustomPickerState extends State<CustomPicker> {
                 controller: widget.scrollController ?? _controller,
                 physics: const FixedExtentScrollPhysics(),
                 radius: widget.radius,
-                perspective: _kDefaultPerspective,
-                offAxisFraction: widget.offAxisFraction,
                 itemExtent: widget.itemExtent,
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: _handleSelectedItemChanged,
@@ -177,15 +211,7 @@ class _CustomPickerState extends State<CustomPicker> {
       ),
     );
 
-    if (widget.backgroundColor != null && widget.backgroundColor.alpha < 255) {
-      result = Stack(
-        children: <Widget>[
-          _addBackgroundToChild(result),
-        ],
-      );
-    } else {
-      result = _addBackgroundToChild(result);
-    }
+    result = _addBackgroundToChild(result);
     return result;
   }
 }

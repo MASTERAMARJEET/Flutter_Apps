@@ -25,9 +25,10 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       body: Container(
         child: CustomPicker(
-            radius: screenWidth - 100.0,
-            // offAxisFraction: 1.0,
+            radius: screenWidth,
             looping: true,
+            squeeze: 1.25,
+            markerRadius: 20.0,
             itemExtent: 50.0,
             onSelectedItemChanged: (int state) {
               print(state);

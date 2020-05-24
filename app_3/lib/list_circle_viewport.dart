@@ -39,8 +39,6 @@ class MyRenderListCircleViewport extends RenderBox
     @required this.childManager,
     @required ViewportOffset offset,
     @required double radius,
-    double perspective = defaultPerspective,
-    double offAxisFraction = 0,
     @required double itemExtent,
     double squeeze = 1,
     bool clipToSize = true,
@@ -50,10 +48,6 @@ class MyRenderListCircleViewport extends RenderBox
         assert(offset != null),
         assert(radius != null),
         assert(radius > 0, radiusZeroMessage),
-        assert(perspective != null),
-        assert(perspective > 0),
-        assert(perspective <= 0.01, perspectiveTooHighMessage),
-        assert(offAxisFraction != null),
         assert(itemExtent != null),
         assert(squeeze != null),
         assert(squeeze > 0),
@@ -66,8 +60,6 @@ class MyRenderListCircleViewport extends RenderBox
         ),
         _offset = offset,
         _radius = radius,
-        _perspective = perspective,
-        _offAxisFraction = offAxisFraction,
         _itemExtent = itemExtent,
         _squeeze = squeeze,
         _clipToSize = clipToSize,
@@ -75,15 +67,9 @@ class MyRenderListCircleViewport extends RenderBox
     addAll(children);
   }
 
-  static const double defaultPerspective = 0.003;
-
   static const String radiusZeroMessage = "You can't set a radius "
       'of 0 or of a negative number. It would imply a circle of 0 in radius '
       'in which case nothing will be drawn.';
-
-  static const String perspectiveTooHighMessage = 'A perspective too high will '
-      'be clipped in the z-axis and therefore not renderable. Value must be '
-      'between 0 and 0.01.';
 
   static const String clipToSizeAndRenderChildrenOutsideViewportConflict =
       'Cannot renderChildrenOutsideViewport and clipToSize since children '
@@ -114,30 +100,6 @@ class MyRenderListCircleViewport extends RenderBox
     _radius = value;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
-  }
-
-  double get perspective => _perspective;
-  double _perspective;
-  set perspective(double value) {
-    assert(value != null);
-    assert(value > 0);
-    assert(
-      value <= 0.01,
-      perspectiveTooHighMessage,
-    );
-    if (value == _perspective) return;
-    _perspective = value;
-    markNeedsPaint();
-    markNeedsSemanticsUpdate();
-  }
-
-  double get offAxisFraction => _offAxisFraction;
-  double _offAxisFraction = 0.0;
-  set offAxisFraction(double value) {
-    assert(value != null);
-    if (value == _offAxisFraction) return;
-    _offAxisFraction = value;
-    markNeedsPaint();
   }
 
   double get itemExtent => _itemExtent;
@@ -243,8 +205,7 @@ class MyRenderListCircleViewport extends RenderBox
   }
 
   double get _maxVisibleRadian {
-    if (_radius <= size.height / 2.0) return math.pi / 2.0;
-    return math.asin(size.height / (_radius * 2.0));
+    return math.pi / 4.0;
   }
 
   double _getIntrinsicCrossAxis(_MyChildSizingFunction childSize) {
@@ -462,8 +423,9 @@ class MyRenderListCircleViewport extends RenderBox
     if (angle > math.pi / 2.0 || angle < -math.pi / 2.0) return;
 
     Matrix4 transform = Matrix4.identity()
-      ..rotateZ(math.pi / 2.0)
-      ..setTranslationRaw((_radius * 11.0) / 20.0, 0.0, 0.0);
+      ..rotateZ(math.pi * 0.75)
+      ..setTranslationRaw((_radius + _itemExtent * 0.675) * (0.5),
+          (_radius + _itemExtent * 0.675) * (0.5), 0.0);
 
     transform *= (Matrix4.rotationZ(angle)) *
         Matrix4.translationValues(0.0, _radius, 0.0);

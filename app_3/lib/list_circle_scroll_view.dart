@@ -380,8 +380,6 @@ class MyListCircleScrollView extends StatefulWidget {
     this.controller,
     this.physics,
     @required this.radius,
-    this.perspective = MyRenderListCircleViewport.defaultPerspective,
-    this.offAxisFraction = 0.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
@@ -391,10 +389,6 @@ class MyListCircleScrollView extends StatefulWidget {
   })  : assert(children != null),
         assert(radius != null),
         assert(radius > 0.0, MyRenderListCircleViewport.radiusZeroMessage),
-        assert(perspective != null),
-        assert(perspective > 0),
-        assert(perspective <= 0.01,
-            MyRenderListCircleViewport.perspectiveTooHighMessage),
         assert(itemExtent != null),
         assert(itemExtent > 0),
         assert(squeeze != null),
@@ -414,8 +408,6 @@ class MyListCircleScrollView extends StatefulWidget {
     this.controller,
     this.physics,
     @required this.radius,
-    this.perspective = MyRenderListCircleViewport.defaultPerspective,
-    this.offAxisFraction = 0.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
@@ -425,10 +417,6 @@ class MyListCircleScrollView extends StatefulWidget {
   })  : assert(childDelegate != null),
         assert(radius != null),
         assert(radius > 0.0, MyRenderListCircleViewport.radiusZeroMessage),
-        assert(perspective != null),
-        assert(perspective > 0),
-        assert(perspective <= 0.01,
-            MyRenderListCircleViewport.perspectiveTooHighMessage),
         assert(itemExtent != null),
         assert(itemExtent > 0),
         assert(squeeze != null),
@@ -447,10 +435,6 @@ class MyListCircleScrollView extends StatefulWidget {
   final ScrollPhysics physics;
 
   final double radius;
-
-  final double perspective;
-
-  final double offAxisFraction;
 
   final double itemExtent;
 
@@ -520,8 +504,6 @@ class _MyListCircleScrollViewState extends State<MyListCircleScrollView> {
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return MyListCircleViewport(
             radius: widget.radius,
-            perspective: widget.perspective,
-            offAxisFraction: widget.offAxisFraction,
             itemExtent: widget.itemExtent,
             squeeze: widget.squeeze,
             clipToSize: widget.clipToSize,
@@ -674,8 +656,6 @@ class MyListCircleViewport extends RenderObjectWidget {
   const MyListCircleViewport({
     Key key,
     @required this.radius,
-    this.perspective = MyRenderListCircleViewport.defaultPerspective,
-    this.offAxisFraction = 0.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.clipToSize = true,
@@ -686,10 +666,6 @@ class MyListCircleViewport extends RenderObjectWidget {
         assert(offset != null),
         assert(radius != null),
         assert(radius > 0, MyRenderListCircleViewport.radiusZeroMessage),
-        assert(perspective != null),
-        assert(perspective > 0),
-        assert(perspective <= 0.01,
-            MyRenderListCircleViewport.perspectiveTooHighMessage),
         assert(itemExtent != null),
         assert(itemExtent > 0),
         assert(squeeze != null),
@@ -704,10 +680,6 @@ class MyListCircleViewport extends RenderObjectWidget {
         super(key: key);
 
   final double radius;
-
-  final double perspective;
-
-  final double offAxisFraction;
 
   final double itemExtent;
 
@@ -731,8 +703,6 @@ class MyListCircleViewport extends RenderObjectWidget {
       childManager: childManager,
       offset: offset,
       radius: radius,
-      perspective: perspective,
-      offAxisFraction: offAxisFraction,
       itemExtent: itemExtent,
       squeeze: squeeze,
       clipToSize: clipToSize,
@@ -746,8 +716,6 @@ class MyListCircleViewport extends RenderObjectWidget {
     renderObject
       ..offset = offset
       ..radius = radius
-      ..perspective = perspective
-      ..offAxisFraction = offAxisFraction
       ..itemExtent = itemExtent
       ..squeeze = squeeze
       ..clipToSize = clipToSize
