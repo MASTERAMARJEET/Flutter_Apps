@@ -41,8 +41,6 @@ class MyRenderListCircleViewport extends RenderBox
     @required double radius,
     @required double itemExtent,
     double squeeze = 1,
-    bool clipToSize = true,
-    bool renderChildrenOutsideViewport = false,
     List<RenderBox> children,
   })  : assert(childManager != null),
         assert(offset != null),
@@ -52,28 +50,14 @@ class MyRenderListCircleViewport extends RenderBox
         assert(squeeze != null),
         assert(squeeze > 0),
         assert(itemExtent > 0),
-        assert(clipToSize != null),
-        assert(renderChildrenOutsideViewport != null),
-        assert(
-          !renderChildrenOutsideViewport || !clipToSize,
-          clipToSizeAndRenderChildrenOutsideViewportConflict,
-        ),
         _offset = offset,
         _radius = radius,
         _itemExtent = itemExtent,
-        _squeeze = squeeze,
-        _clipToSize = clipToSize,
-        _renderChildrenOutsideViewport = renderChildrenOutsideViewport {
-    addAll(children);
-  }
+        _squeeze = squeeze;
 
   static const String radiusZeroMessage = "You can't set a radius "
       'of 0 or of a negative number. It would imply a circle of 0 in radius '
       'in which case nothing will be drawn.';
-
-  static const String clipToSizeAndRenderChildrenOutsideViewportConflict =
-      'Cannot renderChildrenOutsideViewport and clipToSize since children '
-      'rendered outside will be clipped anyway.';
 
   final MyListCircleChildManager childManager;
 
@@ -119,34 +103,6 @@ class MyRenderListCircleViewport extends RenderBox
     assert(value > 0);
     if (value == _squeeze) return;
     _squeeze = value;
-    markNeedsLayout();
-    markNeedsSemanticsUpdate();
-  }
-
-  bool get clipToSize => _clipToSize;
-  bool _clipToSize;
-  set clipToSize(bool value) {
-    assert(value != null);
-    assert(
-      !renderChildrenOutsideViewport || !clipToSize,
-      clipToSizeAndRenderChildrenOutsideViewportConflict,
-    );
-    if (value == _clipToSize) return;
-    _clipToSize = value;
-    markNeedsPaint();
-    markNeedsSemanticsUpdate();
-  }
-
-  bool get renderChildrenOutsideViewport => _renderChildrenOutsideViewport;
-  bool _renderChildrenOutsideViewport;
-  set renderChildrenOutsideViewport(bool value) {
-    assert(value != null);
-    assert(
-      !renderChildrenOutsideViewport || !clipToSize,
-      clipToSizeAndRenderChildrenOutsideViewportConflict,
-    );
-    if (value == _renderChildrenOutsideViewport) return;
-    _renderChildrenOutsideViewport = value;
     markNeedsLayout();
     markNeedsSemanticsUpdate();
   }
@@ -293,8 +249,6 @@ class MyRenderListCircleViewport extends RenderBox
 
     double visibleHeight = size.height * _squeeze;
 
-    if (renderChildrenOutsideViewport) visibleHeight *= 2;
-
     final double firstVisibleOffset =
         offset.pixels + _itemExtent / 2 - visibleHeight / 2;
     final double lastVisibleOffset = firstVisibleOffset + visibleHeight;
@@ -378,7 +332,7 @@ class MyRenderListCircleViewport extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (childCount > 0) {
-      if (_clipToSize && _shouldClipAtCurrentOffset()) {
+      if (_shouldClipAtCurrentOffset()) {
         context.pushClipRect(
           needsCompositing,
           offset,

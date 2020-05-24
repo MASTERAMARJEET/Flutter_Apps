@@ -14,17 +14,20 @@ import 'package:flutter/material.dart' show Colors;
 import './list_circle_scroll_view.dart';
 import './list_circle_viewport.dart' show MyRenderListCircleViewport;
 
-const Color _kDefaultBackground = Color(0xFFD2D4DB);
+const Color _kWheelBackground = Colors.blue,
+    _kMarkerBackground = Colors.greenAccent;
 
-const double _kSqueeze = 1.0;
+const double _kSqueeze = 1.0, _kFontSize = 18.0;
 
 class CustomPicker extends StatefulWidget {
   CustomPicker({
     Key key,
-    @required this.radius,
-    this.backgroundColor = _kDefaultBackground,
+    this.backgroundColor = _kWheelBackground,
+    this.markerColor = _kMarkerBackground,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.fontSize = _kFontSize,
+    @required this.radius,
     @required this.markerRadius,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
@@ -46,10 +49,12 @@ class CustomPicker extends StatefulWidget {
 
   CustomPicker.builder({
     Key key,
-    @required this.radius,
-    this.backgroundColor = _kDefaultBackground,
+    this.backgroundColor = _kWheelBackground,
+    this.markerColor = _kMarkerBackground,
     this.scrollController,
     this.squeeze = _kSqueeze,
+    this.fontSize = _kFontSize,
+    @required this.radius,
     @required this.markerRadius,
     @required this.itemExtent,
     @required this.onSelectedItemChanged,
@@ -68,17 +73,11 @@ class CustomPicker extends StatefulWidget {
             builder: itemBuilder, childCount: childCount),
         super(key: key);
 
-  final double radius;
-
-  final Color backgroundColor;
+  final Color backgroundColor, markerColor;
 
   final FixedExtentScrollController scrollController;
 
-  final double itemExtent;
-
-  final double squeeze;
-
-  final double markerRadius;
+  final double radius, itemExtent, squeeze, markerRadius, fontSize;
 
   final ValueChanged<int> onSelectedItemChanged;
 
@@ -91,7 +90,7 @@ class CustomPicker extends StatefulWidget {
 class _CustomPickerState extends State<CustomPicker> {
   int _lastHapticIndex;
   FixedExtentScrollController _controller;
-  double _markerPosition;
+  double _markerPosition, _radius, _markerRadius;
 
   @override
   void initState() {
@@ -99,6 +98,9 @@ class _CustomPickerState extends State<CustomPicker> {
     if (widget.scrollController == null) {
       _controller = FixedExtentScrollController();
     }
+    _radius = widget.radius;
+    _markerRadius = widget.markerRadius;
+    _markerPosition = _calculateMarkerPosition(_radius, _markerRadius);
   }
 
   @override
@@ -110,8 +112,6 @@ class _CustomPickerState extends State<CustomPicker> {
       assert(_controller == null);
       _controller = FixedExtentScrollController();
     }
-    _markerPosition =
-        _calculateMarkerPosition(widget.radius, widget.markerRadius);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -123,18 +123,9 @@ class _CustomPickerState extends State<CustomPicker> {
 
   void _handleSelectedItemChanged(int index) {
     bool hasSuitableHapticHardware;
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-        hasSuitableHapticHardware = true;
-        break;
-      case TargetPlatform.windows:
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-        hasSuitableHapticHardware = false;
-        break;
-    }
+    hasSuitableHapticHardware =
+        defaultTargetPlatform == TargetPlatform.iOS ? true : false;
+
     assert(hasSuitableHapticHardware != null);
     if (hasSuitableHapticHardware && index != _lastHapticIndex) {
       _lastHapticIndex = index;
@@ -147,9 +138,9 @@ class _CustomPickerState extends State<CustomPicker> {
   }
 
   double _calculateMarkerPosition(double bigRadius, double smallRadius) {
-    /// 9 is in the formula because of the font size of the number. 1.25 is factor.
     double position =
-        (bigRadius - widget.itemExtent + 9 * 1.25) * sqrt1_2 - smallRadius;
+        (bigRadius - widget.itemExtent + widget.fontSize * 0.6) * sqrt1_2 -
+            smallRadius;
     return position;
   }
 
@@ -157,30 +148,27 @@ class _CustomPickerState extends State<CustomPicker> {
     return Stack(
       children: <Widget>[
         Container(
-          child: Placeholder(),
-          width: widget.radius,
-          height: widget.radius,
+          width: _radius,
+          height: _radius,
           decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius:
-                BorderRadius.only(topLeft: Radius.circular(widget.radius)),
+            color: widget.backgroundColor,
+            borderRadius: BorderRadius.only(topLeft: Radius.circular(_radius)),
           ),
         ),
         Positioned(
           bottom: _markerPosition,
           right: _markerPosition,
           child: Container(
-            child: Placeholder(),
-            width: widget.markerRadius * 2,
-            height: widget.markerRadius * 2,
+            width: _markerRadius * 2,
+            height: _markerRadius * 2,
             decoration: BoxDecoration(
-                color: Colors.greenAccent,
+                color: widget.markerColor,
                 borderRadius: BorderRadius.circular(widget.itemExtent)),
           ),
         ),
         Container(
-          width: widget.radius,
-          height: widget.radius,
+          width: _radius,
+          height: _radius,
           child: child,
         )
       ],
@@ -199,7 +187,7 @@ class _CustomPickerState extends State<CustomPicker> {
               child: MyListCircleScrollView.useDelegate(
                 controller: widget.scrollController ?? _controller,
                 physics: const FixedExtentScrollPhysics(),
-                radius: widget.radius,
+                radius: _radius,
                 itemExtent: widget.itemExtent,
                 squeeze: widget.squeeze,
                 onSelectedItemChanged: _handleSelectedItemChanged,

@@ -1,8 +1,6 @@
-// import 'dart:async';
 import 'dart:collection' show HashMap, SplayTreeMap;
 import 'dart:math' as math;
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/physics.dart' show SpringSimulation, FrictionSimulation;
 import 'package:flutter/rendering.dart' show ViewportOffset;
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
@@ -383,8 +381,6 @@ class MyListCircleScrollView extends StatefulWidget {
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
-    this.clipToSize = true,
-    this.renderChildrenOutsideViewport = false,
     @required List<Widget> children,
   })  : assert(children != null),
         assert(radius != null),
@@ -393,13 +389,6 @@ class MyListCircleScrollView extends StatefulWidget {
         assert(itemExtent > 0),
         assert(squeeze != null),
         assert(squeeze > 0),
-        assert(clipToSize != null),
-        assert(renderChildrenOutsideViewport != null),
-        assert(
-          !renderChildrenOutsideViewport || !clipToSize,
-          MyRenderListCircleViewport
-              .clipToSizeAndRenderChildrenOutsideViewportConflict,
-        ),
         childDelegate = MyListCircleChildListDelegate(children: children),
         super(key: key);
 
@@ -411,8 +400,6 @@ class MyListCircleScrollView extends StatefulWidget {
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
-    this.clipToSize = true,
-    this.renderChildrenOutsideViewport = false,
     @required this.childDelegate,
   })  : assert(childDelegate != null),
         assert(radius != null),
@@ -421,13 +408,6 @@ class MyListCircleScrollView extends StatefulWidget {
         assert(itemExtent > 0),
         assert(squeeze != null),
         assert(squeeze > 0),
-        assert(clipToSize != null),
-        assert(renderChildrenOutsideViewport != null),
-        assert(
-          !renderChildrenOutsideViewport || !clipToSize,
-          MyRenderListCircleViewport
-              .clipToSizeAndRenderChildrenOutsideViewportConflict,
-        ),
         super(key: key);
 
   final ScrollController controller;
@@ -441,10 +421,6 @@ class MyListCircleScrollView extends StatefulWidget {
   final double squeeze;
 
   final ValueChanged<int> onSelectedItemChanged;
-
-  final bool clipToSize;
-
-  final bool renderChildrenOutsideViewport;
 
   final MyListCircleChildDelegate childDelegate;
 
@@ -506,8 +482,6 @@ class _MyListCircleScrollViewState extends State<MyListCircleScrollView> {
             radius: widget.radius,
             itemExtent: widget.itemExtent,
             squeeze: widget.squeeze,
-            clipToSize: widget.clipToSize,
-            renderChildrenOutsideViewport: widget.renderChildrenOutsideViewport,
             offset: offset,
             childDelegate: widget.childDelegate,
           );
@@ -658,8 +632,6 @@ class MyListCircleViewport extends RenderObjectWidget {
     @required this.radius,
     @required this.itemExtent,
     this.squeeze = 1.0,
-    this.clipToSize = true,
-    this.renderChildrenOutsideViewport = false,
     @required this.offset,
     @required this.childDelegate,
   })  : assert(childDelegate != null),
@@ -670,13 +642,6 @@ class MyListCircleViewport extends RenderObjectWidget {
         assert(itemExtent > 0),
         assert(squeeze != null),
         assert(squeeze > 0),
-        assert(clipToSize != null),
-        assert(renderChildrenOutsideViewport != null),
-        assert(
-          !renderChildrenOutsideViewport || !clipToSize,
-          MyRenderListCircleViewport
-              .clipToSizeAndRenderChildrenOutsideViewportConflict,
-        ),
         super(key: key);
 
   final double radius;
@@ -684,10 +649,6 @@ class MyListCircleViewport extends RenderObjectWidget {
   final double itemExtent;
 
   final double squeeze;
-
-  final bool clipToSize;
-
-  final bool renderChildrenOutsideViewport;
 
   final ViewportOffset offset;
 
@@ -705,8 +666,6 @@ class MyListCircleViewport extends RenderObjectWidget {
       radius: radius,
       itemExtent: itemExtent,
       squeeze: squeeze,
-      clipToSize: clipToSize,
-      renderChildrenOutsideViewport: renderChildrenOutsideViewport,
     );
   }
 
@@ -717,8 +676,6 @@ class MyListCircleViewport extends RenderObjectWidget {
       ..offset = offset
       ..radius = radius
       ..itemExtent = itemExtent
-      ..squeeze = squeeze
-      ..clipToSize = clipToSize
-      ..renderChildrenOutsideViewport = renderChildrenOutsideViewport;
+      ..squeeze = squeeze;
   }
 }
